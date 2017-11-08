@@ -1,0 +1,1152 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "API w",
+    "version": "1.1.0",
+    "title": "Cognitive Services API"
+  },
+  "basePath": "/auracognitive/v1/",
+  "tags": [
+    {
+      "name": "suggestions",
+      "description": "API that returns suggestions to user"
+    },
+    {
+      "name": "insights resolution",
+      "description": "API that resolve the insights"
+    },
+    {
+      "name": "status",
+      "description": "Endpoints to check if the API is alive"
+    },
+    {
+      "name": "domain classifier",
+      "description": "API that returns the domain to which a phrase belongs"
+    }
+  ],
+  "host": "changeThisForRealHost.es:8000",
+  "schemes": [
+    "http"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/suggestions/query": {
+      "post": {
+        "tags": [
+          "suggestions"
+        ],
+        "description": "List the suggestions to user",
+        "operationId": "listSuggestions",
+        "parameters": [
+          {
+            "name": "X-Aura-Correlator",
+            "in": "header",
+            "type": "string",
+            "format": "uuid",
+            "description": "Correlation id for the different services"
+          },
+          {
+            "name": "suggestionRequest",
+            "required": true,
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/SuggestionRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "Correlator": {
+                "type": "string",
+                "format": "uuid",
+                "description": "Correlation id for the different services"
+              }
+            },
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Suggestion"
+              }
+            },
+            "examples": {
+              "application/json": [
+                {
+                  "intent": "ES_es.all.billing.topup",
+                  "entities": [
+                    {
+                      "type": "payment Gateway"
+                    }
+                  ],
+                  "resource": "ES_es.all.billing.topup.suggestion.payment"
+                },
+                {
+                  "intent": "ES_es.all.billing.topup",
+                  "entities": [
+                    {
+                      "type": "payment Gateway"
+                    }
+                  ],
+                  "resource": "ES_es.all.billing.topup.suggestion.voucher"
+                },
+                {
+                  "intent": "ES_es.all.billing.topup",
+                  "entities": [
+                    {
+                      "type": "payment Gateway"
+                    }
+                  ],
+                  "resource": "ES_es.all.billing.topup.suggestion.cancel"
+                },
+                {
+                  "intent": "ES_es.all.billing.services",
+                  "entities": [
+                    {
+                      "name": "example name"
+                    }
+                  ],
+                  "resource": "",
+                  "default_text": "This text exists if resource is empty"
+                },
+                {
+                  "intent": "ES_es.all.billing.services",
+                  "entities": [
+                    {
+                      "type": "example type"
+                    }
+                  ],
+                  "resource": "ES_es.all.billing.services.suggestion.services"
+                },
+                {
+                  "intent": "ES_es.all.billing.services",
+                  "entities": [
+                    {
+                      "details": "example extra"
+                    }
+                  ],
+                  "resource": "ES_es.all.billing.topup.suggestion.extra",
+                  "resource_params": "50%"
+                }
+              ]
+            }
+          },
+          "400": {
+            "description": "Client specified an invalid argument, request body or query param. Check error message for more information",
+            "headers": {
+              "Correlator": {
+                "type": "string",
+                "format": "uuid",
+                "description": "Correlation id for the different services"
+              }
+            },
+            "schema": {
+              "$ref": "#/definitions/InvalidArgument"
+            },
+            "examples": {
+              "application/json": {
+                "code": "INVALID_ARGUMENT",
+                "message": "Client specified an invalid argument, request body o query param"
+              }
+            }
+          },
+          "404": {
+            "description": "A specified resource is not found, or the request is rejected by undisclosed reasons, such as white listing.",
+            "headers": {
+              "Correlator": {
+                "type": "string",
+                "format": "uuid",
+                "description": "Correlation id for the different services"
+              }
+            },
+            "schema": {
+              "$ref": "#/definitions/NotFound"
+            },
+            "examples": {
+              "application/json": {
+                "code": "NOT_FOUND",
+                "message": "A specified resource is not found"
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "headers": {
+              "Correlator": {
+                "type": "string",
+                "format": "uuid",
+                "description": "Correlation id for the different services"
+              }
+            },
+            "schema": {
+              "$ref": "#/definitions/Internal"
+            },
+            "examples": {
+              "application/json": {
+                "code": "INTERNAL",
+                "message": "Server error"
+              }
+            }
+          },
+          "504": {
+            "description": "Request timeout exceeded. If it happens repeatedly, consider reducing the request complexity",
+            "headers": {
+              "Correlator": {
+                "type": "string",
+                "format": "uuid",
+                "description": "Correlation id for the different services"
+              }
+            },
+            "schema": {
+              "$ref": "#/definitions/Timeout"
+            },
+            "examples": {
+              "application/json": {
+                "code": "TIMEOUT",
+                "message": "Request timeout exceeded. Try it later"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/insights_resolution/query": {
+      "post": {
+        "tags": [
+          "insights resolution"
+        ],
+        "description": "Solves enrich intents by consulting the insights APIs and applying a layer of logic to verify that, despite the delay of the data, the response we give the user is still correct.",
+        "operationId": "InsightsResolution",
+        "parameters": [
+          {
+            "name": "X-Aura-Correlator",
+            "in": "header",
+            "type": "string",
+            "format": "uuid",
+            "description": "Correlation id for the different services"
+          },
+          {
+            "name": "insightsResolutionRequest",
+            "required": true,
+            "in": "body",
+            "schema": {
+              "$ref": "#/definitions/InsightsResolutionRequest"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "Correlator": {
+                "type": "string",
+                "format": "uuid",
+                "description": "Correlation id for the different services"
+              }
+            },
+            "schema": {
+              "$ref": "#/definitions/InsightsResolution"
+            },
+            "examples": {
+              "application/json": {}
+            }
+          },
+          "400": {
+            "description": "Client specified an invalid argument, request body or query param. Check error message for more information",
+            "headers": {
+              "Correlator": {
+                "type": "string",
+                "format": "uuid",
+                "description": "Correlation id for the different services"
+              }
+            },
+            "schema": {
+              "$ref": "#/definitions/InvalidArgument"
+            },
+            "examples": {
+              "application/json": {
+                "code": "INVALID_ARGUMENT",
+                "message": "Client specified an invalid argument, request body o query param"
+              }
+            }
+          },
+          "404": {
+            "description": "A specified resource is not found, or the request is rejected by undisclosed reasons, such as white listing.",
+            "headers": {
+              "Correlator": {
+                "type": "string",
+                "format": "uuid",
+                "description": "Correlation id for the different services"
+              }
+            },
+            "schema": {
+              "$ref": "#/definitions/NotFound"
+            },
+            "examples": {
+              "application/json": {
+                "code": "NOT_FOUND",
+                "message": "A specified resource is not found"
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "headers": {
+              "Correlator": {
+                "type": "string",
+                "format": "uuid",
+                "description": "Correlation id for the different services"
+              }
+            },
+            "schema": {
+              "$ref": "#/definitions/Internal"
+            },
+            "examples": {
+              "application/json": {
+                "code": "INTERNAL",
+                "message": "Server error"
+              }
+            }
+          },
+          "504": {
+            "description": "Request timeout exceeded. If it happens repeatedly, consider reducing the request complexity",
+            "headers": {
+              "Correlator": {
+                "type": "string",
+                "format": "uuid",
+                "description": "Correlation id for the different services"
+              }
+            },
+            "schema": {
+              "$ref": "#/definitions/Timeout"
+            },
+            "examples": {
+              "application/json": {
+                "code": "TIMEOUT",
+                "message": "Request timeout exceeded. Try it later"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/domain_classifier/query": {
+      "post": {
+        "tags": [
+          "domain classifier"
+        ],
+        "description": "API that returns the domain to which a phrase belongs.",
+        "operationId": "DomainClassifierQuery",
+        "parameters": [
+          {
+            "name": "X-Aura-Correlator",
+            "in": "header",
+            "type": "string",
+            "description": "Correlation id for the different services",
+            "format": "uuid"
+          },
+          {
+            "name": "input",
+            "in": "body",
+            "schema": {
+              "type": "string",
+              "description": "Input phrase."
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "headers": {
+              "Correlator": {
+                "type": "string",
+                "format": "uuid",
+                "description": "Correlation id for the different services"
+              }
+            },
+            "schema": {
+              "$ref": "#/definitions/DomainClassifier"
+            },
+            "examples": {
+              "application/json": {}
+            }
+          },
+          "400": {
+            "description": "Client specified an invalid argument, request body or query param. Check error message for more information",
+            "headers": {
+              "Correlator": {
+                "type": "string",
+                "format": "uuid",
+                "description": "Correlation id for the different services"
+              }
+            },
+            "schema": {
+              "$ref": "#/definitions/InvalidArgument"
+            },
+            "examples": {
+              "application/json": {
+                "code": "INVALID_ARGUMENT",
+                "message": "Client specified an invalid argument, request body o query param"
+              }
+            }
+          },
+          "404": {
+            "description": "A specified resource is not found, or the request is rejected by undisclosed reasons, such as white listing.",
+            "headers": {
+              "Correlator": {
+                "type": "string",
+                "format": "uuid",
+                "description": "Correlation id for the different services"
+              }
+            },
+            "schema": {
+              "$ref": "#/definitions/NotFound"
+            },
+            "examples": {
+              "application/json": {
+                "code": "NOT_FOUND",
+                "message": "A specified resource is not found"
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "headers": {
+              "Correlator": {
+                "type": "string",
+                "format": "uuid",
+                "description": "Correlation id for the different services"
+              }
+            },
+            "schema": {
+              "$ref": "#/definitions/Internal"
+            },
+            "examples": {
+              "application/json": {
+                "code": "INTERNAL",
+                "message": "Server error"
+              }
+            }
+          },
+          "504": {
+            "description": "Request timeout exceeded. If it happens repeatedly, consider reducing the request complexity",
+            "headers": {
+              "Correlator": {
+                "type": "string",
+                "format": "uuid",
+                "description": "Correlation id for the different services"
+              }
+            },
+            "schema": {
+              "$ref": "#/definitions/Timeout"
+            },
+            "examples": {
+              "application/json": {
+                "code": "TIMEOUT",
+                "message": "Request timeout exceeded. Try it later"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/domain_classifier/status": {
+      "get": {
+        "tags": [
+          "domain classifier",
+          "status"
+        ],
+        "operationId": "DomainClassifierStatus",
+        "description": "API that returns info about status of APIs.",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "items": {
+                "$ref": "#/definitions/Status"
+              }
+            },
+            "examples": {
+              "application/json": {}
+            }
+          },
+          "400": {
+            "description": "Client specified an invalid argument, request body or query param. Check error message for more information",
+            "headers": {
+              "Correlator": {
+                "type": "string",
+                "format": "uuid",
+                "description": "Correlation id for the different services"
+              }
+            },
+            "schema": {
+              "$ref": "#/definitions/InvalidArgument"
+            },
+            "examples": {
+              "application/json": {
+                "code": "INVALID_ARGUMENT",
+                "message": "Client specified an invalid argument, request body o query param"
+              }
+            }
+          },
+          "404": {
+            "description": "A specified resource is not found, or the request is rejected by undisclosed reasons, such as white listing.",
+            "headers": {
+              "Correlator": {
+                "type": "string",
+                "format": "uuid",
+                "description": "Correlation id for the different services"
+              }
+            },
+            "schema": {
+              "$ref": "#/definitions/NotFound"
+            },
+            "examples": {
+              "application/json": {
+                "code": "NOT_FOUND",
+                "message": "A specified resource is not found"
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "headers": {
+              "Correlator": {
+                "type": "string",
+                "format": "uuid",
+                "description": "Correlation id for the different services"
+              }
+            },
+            "schema": {
+              "$ref": "#/definitions/Internal"
+            },
+            "examples": {
+              "application/json": {
+                "code": "INTERNAL",
+                "message": "Server error"
+              }
+            }
+          },
+          "504": {
+            "description": "Request timeout exceeded. If it happens repeatedly, consider reducing the request complexity",
+            "headers": {
+              "Correlator": {
+                "type": "string",
+                "format": "uuid",
+                "description": "Correlation id for the different services"
+              }
+            },
+            "schema": {
+              "$ref": "#/definitions/Timeout"
+            },
+            "examples": {
+              "application/json": {
+                "code": "TIMEOUT",
+                "message": "Request timeout exceeded. Try it later"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/suggestion/status": {
+      "get": {
+        "tags": [
+          "suggestions",
+          "status"
+        ],
+        "operationId": "SuggestionStatus",
+        "description": "API that returns info about status of Suggestions API.",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "items": {
+                "$ref": "#/definitions/Status"
+              }
+            },
+            "examples": {
+              "application/json": {}
+            }
+          },
+          "400": {
+            "description": "Client specified an invalid argument, request body or query param. Check error message for more information",
+            "headers": {
+              "Correlator": {
+                "type": "string",
+                "format": "uuid",
+                "description": "Correlation id for the different services"
+              }
+            },
+            "schema": {
+              "$ref": "#/definitions/InvalidArgument"
+            },
+            "examples": {
+              "application/json": {
+                "code": "INVALID_ARGUMENT",
+                "message": "Client specified an invalid argument, request body o query param"
+              }
+            }
+          },
+          "404": {
+            "description": "A specified resource is not found, or the request is rejected by undisclosed reasons, such as white listing.",
+            "headers": {
+              "Correlator": {
+                "type": "string",
+                "format": "uuid",
+                "description": "Correlation id for the different services"
+              }
+            },
+            "schema": {
+              "$ref": "#/definitions/NotFound"
+            },
+            "examples": {
+              "application/json": {
+                "code": "NOT_FOUND",
+                "message": "A specified resource is not found"
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "headers": {
+              "Correlator": {
+                "type": "string",
+                "format": "uuid",
+                "description": "Correlation id for the different services"
+              }
+            },
+            "schema": {
+              "$ref": "#/definitions/Internal"
+            },
+            "examples": {
+              "application/json": {
+                "code": "INTERNAL",
+                "message": "Server error"
+              }
+            }
+          },
+          "504": {
+            "description": "Request timeout exceeded. If it happens repeatedly, consider reducing the request complexity",
+            "headers": {
+              "Correlator": {
+                "type": "string",
+                "format": "uuid",
+                "description": "Correlation id for the different services"
+              }
+            },
+            "schema": {
+              "$ref": "#/definitions/Timeout"
+            },
+            "examples": {
+              "application/json": {
+                "code": "TIMEOUT",
+                "message": "Request timeout exceeded. Try it later"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/insights_resolution/status": {
+      "get": {
+        "tags": [
+          "insights resolution",
+          "status"
+        ],
+        "operationId": "InsightsResolutionStatus",
+        "description": "API that returns info about status of Insights_resolution API.",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "type": "object",
+              "items": {
+                "$ref": "#/definitions/Status"
+              }
+            },
+            "examples": {
+              "application/json": {}
+            }
+          },
+          "400": {
+            "description": "Client specified an invalid argument, request body or query param. Check error message for more information",
+            "headers": {
+              "Correlator": {
+                "type": "string",
+                "format": "uuid",
+                "description": "Correlation id for the different services"
+              }
+            },
+            "schema": {
+              "$ref": "#/definitions/InvalidArgument"
+            },
+            "examples": {
+              "application/json": {
+                "code": "INVALID_ARGUMENT",
+                "message": "Client specified an invalid argument, request body o query param"
+              }
+            }
+          },
+          "404": {
+            "description": "A specified resource is not found, or the request is rejected by undisclosed reasons, such as white listing.",
+            "headers": {
+              "Correlator": {
+                "type": "string",
+                "format": "uuid",
+                "description": "Correlation id for the different services"
+              }
+            },
+            "schema": {
+              "$ref": "#/definitions/NotFound"
+            },
+            "examples": {
+              "application/json": {
+                "code": "NOT_FOUND",
+                "message": "A specified resource is not found"
+              }
+            }
+          },
+          "500": {
+            "description": "Server error",
+            "headers": {
+              "Correlator": {
+                "type": "string",
+                "format": "uuid",
+                "description": "Correlation id for the different services"
+              }
+            },
+            "schema": {
+              "$ref": "#/definitions/Internal"
+            },
+            "examples": {
+              "application/json": {
+                "code": "INTERNAL",
+                "message": "Server error"
+              }
+            }
+          },
+          "504": {
+            "description": "Request timeout exceeded. If it happens repeatedly, consider reducing the request complexity",
+            "headers": {
+              "Correlator": {
+                "type": "string",
+                "format": "uuid",
+                "description": "Correlation id for the different services"
+              }
+            },
+            "schema": {
+              "$ref": "#/definitions/Timeout"
+            },
+            "examples": {
+              "application/json": {
+                "code": "TIMEOUT",
+                "message": "Request timeout exceeded. Try it later"
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "SuggestionRequest": {
+      "type": "object",
+      "required": [
+        "user_id",
+        "user_token",
+        "prepaid",
+        "intent"
+      ],
+      "properties": {
+        "user_id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Id of user associate with the OB"
+        },
+        "user_token": {
+          "type": "string",
+          "description": "Id of user associate with the OB"
+        },
+        "intent": {
+          "type": "string",
+          "description": "Name of intent resolved by recognizers"
+        },
+        "entities": {
+          "type": "array",
+          "description": "Key value array of entities",
+          "items": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        },
+        "prepaid": {
+          "description": "Indicates if the msisdn is prepaid",
+          "type": "boolean"
+        }
+      }
+    },
+    "Suggestion": {
+      "type": "object",
+      "required": [
+        "intent",
+        "resource"
+      ],
+      "properties": {
+        "intent": {
+          "type": "string",
+          "description": "Name of intent resolved by recognizers"
+        },
+        "entities": {
+          "type": "array",
+          "description": "Key value array of entities",
+          "items": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        },
+        "resource": {
+          "type": "string",
+          "description": "Identificator of resource to obtain the text"
+        },
+        "resource_params": {
+          "type": "array",
+          "description": "Contains the parameters included in text",
+          "items": {
+            "type": "string"
+          }
+        },
+        "default_text": {
+          "type": "string",
+          "description": "if the resource is empty this field contains the text"
+        }
+      }
+    },
+    "InsightsResolutionRequest": {
+      "type": "object",
+      "required": [
+        "user_id",
+        "user_token",
+        "prepaid",
+        "intent"
+      ],
+      "properties": {
+        "user_id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "Id of user associate with the OB"
+        },
+        "user_token": {
+          "type": "string",
+          "description": "Id of user associate with the OB"
+        },
+        "intent": {
+          "type": "string",
+          "description": "Name of intent resolved by recognizers"
+        },
+        "entities": {
+          "type": "array",
+          "description": "Key value array of entities",
+          "items": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        },
+        "prepaid": {
+          "description": "Indicates if the msisdn is prepaid",
+          "type": "boolean"
+        },
+        "payload": {
+          "type": "object",
+          "description": "Contains all data if the intent resolves a Notification"
+        }
+      }
+    },
+    "InsightsResolution": {
+      "type": "object",
+      "required": [
+        "intent",
+        "resource"
+      ],
+      "properties": {
+        "intent": {
+          "type": "string",
+          "description": "Name of intent resolved by recognizers"
+        },
+        "entities": {
+          "type": "array",
+          "description": "Key value array of entities",
+          "items": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          }
+        },
+        "resource": {
+          "type": "string",
+          "description": "Identificator of resource to obtain the text"
+        },
+        "resource_params": {
+          "type": "array",
+          "description": "Contains the parameters included in text",
+          "items": {
+            "type": "string"
+          }
+        },
+        "default_text": {
+          "type": "string",
+          "description": "if the resource is empty this field contains the text"
+        },
+        "deeplink": {
+          "type": "string",
+          "description": "Link to external resource"
+        },
+        "payload": {
+          "type": "object",
+          "description": "Contains all data to build a response to the channel"
+        }
+      }
+    },
+    "Status": {
+      "type": "object",
+      "required": [
+        "msg",
+        "data",
+        "time"
+      ],
+      "properties": {
+        "msg": {
+          "type": "string",
+          "description": "Status server message"
+        },
+        "data": {
+          "type": "string",
+          "description": "Messages with the API which are ready"
+        },
+        "time": {
+          "type": "string",
+          "description": "Time if response"
+        }
+      }
+    },
+    "DomainClassifier": {
+      "type": "object",
+      "required": [
+        "phrase",
+        "domainPredict",
+        "classProbability"
+      ],
+      "properties": {
+        "phrase": {
+          "type": "string",
+          "description": "Original input phrase."
+        },
+        "domainPredict": {
+          "type": "array",
+          "description": "Domain classification",
+          "items": {
+            "type": "string"
+          }
+        },
+        "classProbability": {
+          "type": "array",
+          "description": "Probability for each domain",
+          "items": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "number",
+              "format": "double"
+            }
+          }
+        }
+      }
+    },
+    "ModelError": {
+      "type": "object",
+      "required": [
+        "message"
+      ],
+      "properties": {
+        "message": {
+          "type": "string",
+          "description": "A human readable description of what the event represent"
+        }
+      }
+    },
+    "InvalidArgument": {
+      "allOf": [
+        {
+          "type": "object",
+          "required": [
+            "code"
+          ],
+          "properties": {
+            "code": {
+              "type": "string",
+              "enum": [
+                "INVALID_ARGUMENT"
+              ],
+              "default": "INVALID_ARGUMENT",
+              "description": "Client specified an invalid argument, request body or query param."
+            }
+          }
+        },
+        {
+          "$ref": "#/definitions/ModelError"
+        }
+      ]
+    },
+    "OutOfRange": {
+      "allOf": [
+        {
+          "type": "object",
+          "required": [
+            "code"
+          ],
+          "properties": {
+            "code": {
+              "type": "string",
+              "enum": [
+                "OUT_OF_RANGE"
+              ],
+              "default": "OUT_OF_RANGE",
+              "description": "Client specified an invalid range"
+            }
+          }
+        },
+        {
+          "$ref": "#/definitions/ModelError"
+        }
+      ]
+    },
+    "NotFound": {
+      "allOf": [
+        {
+          "type": "object",
+          "required": [
+            "code"
+          ],
+          "properties": {
+            "code": {
+              "type": "string",
+              "enum": [
+                "NOT_FOUND"
+              ],
+              "default": "NOT_FOUND",
+              "description": "The specified resource is not found"
+            }
+          }
+        },
+        {
+          "$ref": "#/definitions/ModelError"
+        }
+      ]
+    },
+    "Internal": {
+      "allOf": [
+        {
+          "type": "object",
+          "required": [
+            "code"
+          ],
+          "properties": {
+            "code": {
+              "type": "string",
+              "enum": [
+                "INTERNAL"
+              ],
+              "default": "INTERNAL",
+              "description": "Unknown server error.Typically a server bug"
+            }
+          }
+        },
+        {
+          "$ref": "#/definitions/ModelError"
+        }
+      ]
+    },
+    "Unavailable": {
+      "allOf": [
+        {
+          "type": "object",
+          "required": [
+            "code"
+          ],
+          "properties": {
+            "code": {
+              "type": "string",
+              "enum": [
+                "UNAVAILABLE"
+              ],
+              "default": "UNAVAILABLE",
+              "description": "Request timeout exceeded"
+            }
+          }
+        },
+        {
+          "$ref": "#/definitions/ModelError"
+        }
+      ]
+    },
+    "Timeout": {
+      "allOf": [
+        {
+          "type": "object",
+          "required": [
+            "code"
+          ],
+          "properties": {
+            "code": {
+              "type": "string",
+              "enum": [
+                "TIMEOUT"
+              ],
+              "default": "TIMEOUT",
+              "description": "Request timeout exceeded"
+            }
+          }
+        },
+        {
+          "$ref": "#/definitions/ModelError"
+        }
+      ]
+    },
+    "NotImplemented": {
+      "allOf": [
+        {
+          "type": "object",
+          "required": [
+            "code"
+          ],
+          "properties": {
+            "code": {
+              "type": "string",
+              "enum": [
+                "NOT_IMPLEMENTED"
+              ],
+              "default": "NOT_IMPLEMENTED",
+              "description": "This functionality is not implemented yet"
+            }
+          }
+        },
+        {
+          "$ref": "#/definitions/ModelError"
+        }
+      ]
+    }
+  }
+}

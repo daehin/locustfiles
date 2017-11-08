@@ -1,0 +1,177 @@
+{
+  "definitions": {
+    "ModelError": {
+      "type": "object",
+      "required": [
+        "message"
+      ],
+      "properties": {
+        "message": {
+          "type": "string",
+          "description": "A human readable description of what the event represent"
+        }
+      }
+    },
+    "InvalidArgument": {
+      "allOf": [
+        {
+          "type": "object",
+          "required": [
+            "code"
+          ],
+          "properties": {
+            "code": {
+              "type": "string",
+              "enum": [
+                "INVALID_ARGUMENT"
+              ],
+              "default": "INVALID_ARGUMENT",
+              "description": "Client specified an invalid argument, request body or query param."
+            }
+          }
+        },
+        {
+          "$ref": "#/definitions/ModelError"
+        }
+      ]
+    },
+    "OutOfRange": {
+      "allOf": [
+        {
+          "type": "object",
+          "required": [
+            "code"
+          ],
+          "properties": {
+            "code": {
+              "type": "string",
+              "enum": [
+                "OUT_OF_RANGE"
+              ],
+              "default": "OUT_OF_RANGE",
+              "description": "Client specified an invalid range"
+            }
+          }
+        },
+        {
+          "$ref": "#/definitions/ModelError"
+        }
+      ]
+    },
+    "NotFound": {
+      "allOf": [
+        {
+          "type": "object",
+          "required": [
+            "code"
+          ],
+          "properties": {
+            "code": {
+              "type": "string",
+              "enum": [
+                "NOT_FOUND"
+              ],
+              "default": "NOT_FOUND",
+              "description": "The specified resource is not found"
+            }
+          }
+        },
+        {
+          "$ref": "#/definitions/ModelError"
+        }
+      ]
+    },
+    "Internal": {
+      "allOf": [
+        {
+          "type": "object",
+          "required": [
+            "code"
+          ],
+          "properties": {
+            "code": {
+              "type": "string",
+              "enum": [
+                "INTERNAL"
+              ],
+              "default": "INTERNAL",
+              "description": "Unknown server error.Typically a server bug"
+            }
+          }
+        },
+        {
+          "$ref": "#/definitions/ModelError"
+        }
+      ]
+    },
+    "Unavailable": {
+      "allOf": [
+        {
+          "type": "object",
+          "required": [
+            "code"
+          ],
+          "properties": {
+            "code": {
+              "type": "string",
+              "enum": [
+                "UNAVAILABLE"
+              ],
+              "default": "UNAVAILABLE",
+              "description": "Request timeout exceeded"
+            }
+          }
+        },
+        {
+          "$ref": "#/definitions/ModelError"
+        }
+      ]
+    },
+    "Timeout": {
+      "allOf": [
+        {
+          "type": "object",
+          "required": [
+            "code"
+          ],
+          "properties": {
+            "code": {
+              "type": "string",
+              "enum": [
+                "TIMEOUT"
+              ],
+              "default": "TIMEOUT",
+              "description": "Request timeout exceeded"
+            }
+          }
+        },
+        {
+          "$ref": "#/definitions/ModelError"
+        }
+      ]
+    },
+    "NotImplemented": {
+      "allOf": [
+        {
+          "type": "object",
+          "required": [
+            "code"
+          ],
+          "properties": {
+            "code": {
+              "type": "string",
+              "enum": [
+                "NOT_IMPLEMENTED"
+              ],
+              "default": "NOT_IMPLEMENTED",
+              "description": "This functionality is not implemented yet"
+            }
+          }
+        },
+        {
+          "$ref": "#/definitions/ModelError"
+        }
+      ]
+    }
+  }
+}
